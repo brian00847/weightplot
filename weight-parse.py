@@ -1,12 +1,18 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 
 import json, csv
 from datetime import datetime
 
+#matplot lib is installed for python2.7 on CentOS 7
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+
+
 
 OUT_CSV = './normalized_weights.csv'
-garmin_data = 'garmin_connect_data.json'
-google_fit_data = 'google-fit-daily-summaries.csv'
+garmin_data = 'rawdata/garmin_connect_data.json'
+google_fit_data = 'rawdata/google-fit-daily-summaries.csv'
 
 class WeightEntry(object):
     def __init__(self, date_obj_, weight_lb_):
@@ -59,7 +65,7 @@ def fill_google_weights(weight_entries):
 
 def parse_google_fit(google_fit_file):
     weight_entries = list()
-    with open(google_fit_file, newline='') as csvfile:
+    with open(google_fit_file) as csvfile:
         my_csv_reader = csv.reader(csvfile)
         irow = 0
         for row in my_csv_reader:
@@ -94,6 +100,7 @@ def dump_entries(entries, out_csv):
         fout.write('{}, {}\n'.format(we.date_obj, we.weight_lb))
     
 
+
 def combine_entries(entries1, entries2):
     d1 = dict()
 
@@ -114,6 +121,31 @@ def combine_entries(entries1, entries2):
         sorted_list.append(d1[k])
     return sorted_list
 
+def plot_entries(weight_entries):
+    t = [ e.date_obj for e in weight_entries[2:] ]
+    s = [ e.weight_lb for e in weight_entries[2:] ]
+
+    fig, ax = plt.subplots()
+    ax.plot(t, s)
+
+    ax.set(xlabel='date', ylabel='weight (freedom units)',
+        title='Weight from 2018 to 2019')
+    ax.grid()
+
+    d = datetime(2018, 5, 15).date()
+    annoated_text = 'Begin Here'
+
+    annotated_entry = [ x for x in  weight_entries if x.date_obj == d][0]
+    x = annotated_entry.date_obj
+    y = annotated_entry.weight_lb
+    plt.annotate(annoated_text, xy=(x, y), xytext=(x, y + 5),
+                arrowprops=dict(facecolor='black', shrink=0.05),
+                            )
+
+
+    fig.savefig("test.png")
+    plt.show()
+
 weight_entries_garmin = list()
 weight_entries_google = list()
 
@@ -132,5 +164,10 @@ print("{} entries total".format(len(combined_list)))
     #print("{} {}".format(we.date_obj, we.weight_lb))
 
 dump_entries(combined_list, OUT_CSV)
+
+#Remove old data
+combined_list = [ e for e in combined_list if e.date_obj.year >= 2018 and e.date_obj.month >= 3]
+
+plot_entries(combined_list)
 
 
