@@ -121,6 +121,8 @@ def combine_entries(entries1, entries2):
         sorted_list.append(d1[k])
     return sorted_list
 
+#def annotate_plot(plt, fig):
+
 def plot_entries(weight_entries):
     t = [ e.date_obj for e in weight_entries[2:] ]
     s = [ e.weight_lb for e in weight_entries[2:] ]
@@ -132,15 +134,29 @@ def plot_entries(weight_entries):
         title='Weight from 2018 to 2019')
     ax.grid()
 
-    d = datetime(2018, 5, 15).date()
-    annoated_text = 'Begin Here'
+    annotations = [( datetime(2018, 5, 15).date(), 'Highest weigh in'),
+                   ( datetime(2018, 6, 15).date(), 'Actually Make Changes in Diet'),
+                   ( datetime(2018, 7, 1).date(), "Holy Shit it's working!! Lets keep going!!"),
+                   ( datetime(2019, 3, 5).date(), "abc123")]
+    for annotation in annotations:
+        d = annotation[0]
+        annotated_text = annotation[1]
+        #d = datetime(2018, 5, 15).date()
+        #annotated_text = 'Begin Here'
 
-    annotated_entry = [ x for x in  weight_entries if x.date_obj == d][0]
-    x = annotated_entry.date_obj
-    y = annotated_entry.weight_lb
-    plt.annotate(annoated_text, xy=(x, y), xytext=(x, y + 5),
-                arrowprops=dict(facecolor='black', shrink=0.05),
-                            )
+        #for x in weight_entries:
+        #    print x.date_obj
+        new_list = [ x for x in  weight_entries if x.date_obj == d]
+        #print(d)
+        #print(len(new_list))
+        #print(weight_entries)
+        annotated_entry = new_list[0]
+        x = annotated_entry.date_obj
+        y = annotated_entry.weight_lb
+
+        plt.annotate(annotated_text, xy=(x, y), xytext=(x, y + 5),
+                    arrowprops=dict(facecolor='black', shrink=0.05),
+                                )
 
 
     fig.savefig("test.png")
